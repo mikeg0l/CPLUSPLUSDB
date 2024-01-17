@@ -10,4 +10,5 @@ public:
     void addTable(const Table& table);
     void loadTable(const std::string &filePath);
     void listTables();
+    void deleteTable(const std::string& name);
 };

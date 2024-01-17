@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include "../table/datatype.h"
 
 struct Mapper {
@@ -12,19 +13,20 @@ struct Mapper {
  https://cpp-polska.pl/post/jak-uzywac-stdvisit-z-wieloma-wariantami
  */
 struct DataTypeToStringValue {
-    std::string operator()(const std::string &x) const {return x;}
+    std::string operator()(const std::string& x) const {return x;}
     std::string operator()(int &x) const {return std::to_string(x);}
     std::string operator()(float &x) const {return std::to_string(x);}
-    std::string operator()(bool &x) const {
-        if (x == 1) {
-            return "TRUE";
-        } else {
-            return "FALSE";
-        }
-    }
+    std::string operator()(bool &x) const {return  (x == 1) ? "TRUE" : "FALSE";}
 };
 
-struct DataTypeToStringType {
+struct DataTypeToStringValueSave {
+    std::string operator()(const std::string& x) const {return "\"" + x + "\"";}
+    std::string operator()(int &x) const {return std::to_string(x);}
+    std::string operator()(float &x) const {return std::to_string(x);}
+    std::string operator()(bool &x) const {return  (x == 1) ? "TRUE" : "FALSE";}
+};
+
+struct DataTypeToTypeString {
     std::string operator()(const std::string &x) const {return "STRING";}
     std::string operator()(int &x) const {return "INT";}
     std::string operator()(float &x) const {return "FLOAT";}

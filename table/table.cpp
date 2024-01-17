@@ -126,14 +126,14 @@ void Table::save(const std::string& filePath) {
     file << name << std::endl;
 
     for (const auto& columnName : columnOrder) {
-        file << columnName << " " << std::visit(DataTypeToStringType(), columns[columnName]) << std::endl;
+        file << columnName << " " << std::visit(DataTypeToTypeString(), columns[columnName]) << std::endl;
     }
 
     file << std::endl;
 
     for (auto& row : rows) {
         for (const auto& columnName : columnOrder) {
-            file << std::visit(DataTypeToStringValue(), row.columns[columnName]) << " ";
+            file << std::visit(DataTypeToStringValueSave(), row.columns[columnName]) << " ";
         }
         file << std::endl;
     }
@@ -150,14 +150,14 @@ void Table::deleteRow() {
 
 }
 
-void Table::deleteTable() {
-
-}
-
 std::string Table::getPrimaryKey() {
     return primaryKey;
 }
 
 std::string Table::getName() {
     return name;
+}
+
+std::vector<std::string> Table::getColumnOrder() {
+    return columnOrder;
 }

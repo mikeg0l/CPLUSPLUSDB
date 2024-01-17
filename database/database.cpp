@@ -1,7 +1,9 @@
 #include <fstream>
 #include <sstream>
+#include <iomanip>
 #include "database.h"
 #include "fmt/core.h"
+
 /*
  Rozwiązanie problemu z przekazywaniem adresu fizycznego tabeli zamiast kopii
  https://www.educative.io/answers/resolving-the-function-returns-address-of-local-variable-error
@@ -51,14 +53,14 @@ void Database::loadTable(const std::string& filePath) {
 
     while (std::getline(file, line)) {
         if (line.empty()) {
-            continue; // Skip empty lines
+            continue;
         }
 
         std::istringstream iss(line);
         std::map<std::string, std::string> rowData;
         for (const auto& columnName : columnNames) {
             std::string value;
-            iss >> value;
+            iss >> std::quoted(value);
             rowData[columnName] = value;
         }
 
@@ -74,5 +76,13 @@ void Database::loadTable(const std::string& filePath) {
 void Database::listTables() {
     for (auto& table : tables) {
         fmt::println("{}", table.getName());
+    }
+}
+
+void Database::deleteTable(const std::string& name) {
+    for (int i = 0; i < tables.size(); ++i) {
+        if (tables[i].getName() == name) {
+            tables.erase(tables.begin()+i);
+        }
     }
 }

@@ -14,5 +14,8 @@ add_executable(2324Z_19_s26525_FK main.cpp
         utils/printer.cpp
         utils/mapper.cpp
         database/database.cpp
-        database/database.h)
+        database/database.h
+        handlers/handlers.cpp
+        handlers/handlers.h
+)
 target_link_libraries(2324Z_19_s26525_FK fmt)
