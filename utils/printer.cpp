@@ -3,6 +3,6 @@
 
 void Printer::printHorizontalLine(unsigned long long size) {
     for (int i = 0; i < size; i++)
-        fmt::print("---------------------");
+        fmt::print("--------------");
     fmt::println("");
 }

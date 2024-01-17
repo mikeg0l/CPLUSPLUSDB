@@ -1,24 +1,76 @@
+#include <iostream>
+#include <sstream>
 #include "table/tablerow.h"
 #include "table/table.h"
+#include "database/database.h"
 #include "fmt/core.h"
 
 int main() {
-    auto command = std::string("CREATE TABLE blabla (INT id, STRING name, STRING surname)");
+    Database db;
+    db.loadTable("DATA.txt");
 
-    auto table = new Table();
-    auto tableName = "PEOPLE";
-    auto columnNames = std::vector<std::string>({"ID", "NAME", "SURNAME", "AGE"});
-    auto columnTypes = std::vector<std::string>({"INT", "STRING", "STRING", "INT"});
-    table->createTable(tableName, columnNames, columnTypes);
-    table->display();
-    auto insertData = std::map<std::string,std::string>{{"ID", "1"}, {"NAME", "Borys"}, {"SURNAME", "Maciejewski"}, {"AGE", "20"}};
-    auto insertData2 = std::map<std::string,std::string>{{"ID", "2"}, {"NAME", "Paweł"}, {"SURNAME", "Walda"}, {"AGE", "19"}};
-    auto insertData3 = std::map<std::string,std::string>{{"ID", "3"}, {"NAME", "Mateusz"}, {"SURNAME", "Krasucki"}, {"AGE", "21"}};
-    table->insert(insertData);
-    table->insert(insertData2);
-    table->insert(insertData3);
-    table->display();
-    table->addColumn("HEIGHT", "FLOAT");
-    table->display();
+    while (true) {
+        std::string input, command;
+        std::getline(std::cin, input);
+        std::istringstream iss(input);
 
+        iss >> command;
+        if (command == "CREATE") {
+            fmt::println("wow");
+        }
+        /**
+         * SAVE tableName filePath
+         *
+         * @param tableName The name of the table which will be saved
+         * @param filePath The path to which table data will be saved to
+         */
+        else if (command == "SAVE") {
+            std::string tableName, filePath;
+            iss >> tableName >> filePath;
+            db.getTable(tableName)->save(filePath);
+        }
+
+        else if (command == "LOAD") {
+            std::string filePath;
+            iss >> filePath;
+            db.loadTable(filePath);
+        }
+
+        else if (command == "UPDATE") {
+
+        }
+
+        else if (command == "DELETE") {
+
+        }
+
+        else if (command == "ADD") {
+            std::string subCommand;
+            iss >> subCommand;
+            if (subCommand == "COLUMN") {
+                std::string tableName, columnName, columnType;
+                iss >> tableName >> columnName >> columnType;
+                db.getTable(tableName)->addColumn(columnName, columnType);
+            }
+        }
+
+        else if (command == "INSERT") {
+
+        }
+
+        else if (command == "DISPLAY") {
+            std::string tableName;
+            iss >> tableName;
+            db.getTable(tableName)->display();
+        }
+
+
+        else if (command == "LIST") {
+            db.listTables();
+        }
+
+    }
+    db.getTable("EMPLOYEES")->display();
+    db.getTable("EMPLOYEES")->update({{"NAME", "Borys"}}, "HEIGHT", "115.5");
+    db.getTable("EMPLOYEES")->display();
 }

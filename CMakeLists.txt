@@ -8,11 +8,11 @@ FetchContent_Declare(
         GIT_TAG 10.2.1
 )
 FetchContent_MakeAvailable(fmt)
-add_executable(2324Z_19_s26525_FK main.cpp table/tablerow.cpp
+add_executable(2324Z_19_s26525_FK main.cpp
         table/table.cpp
-        parser/parser.cpp
+        utils/parser.cpp
         utils/printer.cpp
-        utils/printer.h
         utils/mapper.cpp
-        utils/mapper.h)
+        database/database.cpp
+        database/database.h)
 target_link_libraries(2324Z_19_s26525_FK fmt)
