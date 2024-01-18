@@ -5,7 +5,6 @@
 void handleCreateTable(Database& db, std::istringstream& iss) {
     std::string tableName;
     iss >> tableName;
-
     std::string tmp;
     std::vector<std::string> columnNames, columnTypes;
     while (iss >> tmp) {
@@ -21,6 +20,12 @@ void handleDeleteTable(Database& db, std::istringstream& iss) {
     std::string tableName;
     iss >> tableName;
     db.deleteTable(tableName);
+}
+
+void handleSelect(Database& db, std::istringstream& iss) {
+    std::string whereClause, tableName;
+    iss >> tableName;
+    db.getTable(tableName)->matchWhereClause(iss);
 }
 
 void handleSave(Database& db, std::istringstream& iss) {

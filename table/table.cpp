@@ -3,6 +3,8 @@
 #include "fmt/core.h"
 #include "../utils/printer.h"
 #include "../utils/mapper.h"
+#include "condition.h"
+#include "../utils/parser.h"
 
 Table::Table(const std::string& tableName, const std::vector<std::string>& columnNames,
              const std::vector<std::string>& columnTypes)
@@ -108,7 +110,7 @@ void Table::convertAndAssignValue(const std::string& columnName, const std::stri
         } else if (columnType.index() == 2) { // FLOAT
             row.columns[columnName] = std::stof(value);
         } else if (columnType.index() == 3) { // BOOL
-            row.columns[columnName] = (value == "TRUE" or value == "true");
+            row.columns[columnName] = (value == "true");
         }
     } catch (const std::invalid_argument &e) {
         fmt::println("ERROR: INVALID TYPE FOR COLUMN {}", columnName);
@@ -142,8 +144,34 @@ void Table::save(const std::string& filePath) {
     fmt::println("INFO: TABLE SAVED TO {}", filePath);
 }
 
-void Table::createRelation() {
+std::vector<TableRow> Table::matchWhereClause(std::istringstream& whereClause) {
+    std::vector<TableRow> matchedRows;
 
+    std::vector<Condition> conditions;
+    std::vector<std::string> logicalOperators;
+
+    parseWhereClause(whereClause, &conditions, &logicalOperators);
+
+    for (auto& row : rows) {
+        bool rowValid = true;
+        for (auto& [columnName, columnValue] : row.columns) {
+            for (auto& condition : conditions) {
+                if (!(condition.getColumnName() == columnName && condition.eval(columnValue))) {
+                    rowValid = false;
+                }
+            }
+        }
+        // bool eval condition1
+        // bool eval condition2
+        // bool eval condition3
+        // bool eval conditionN
+        // std::vector<Condition> conditiny
+        // std::vector<bool> conditiny
+        // std::vector<std::string> Operatorylogincze n - 1
+        // Condition1.result AND Condition2.result OR Condition3.result AND Condition4.result
+        //
+
+    }
 }
 
 void Table::deleteRow() {

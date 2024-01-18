@@ -10,6 +10,7 @@ void handleDeleteRow(Database& db, std::istringstream& iss);
 void handleSave(Database& db, std::istringstream& iss);
 void handleLoad(Database& db, std::istringstream& iss);
 void handleInsert(Database& db, std::istringstream& iss);
+void handleSelect(Database& db, std::istringstream& iss);
 void handleUpdate(Database& db, std::istringstream& iss);
 void handleList(Database& db, std::istringstream& iss);
 void handleDisplay(Database& db, std::istringstream& iss);

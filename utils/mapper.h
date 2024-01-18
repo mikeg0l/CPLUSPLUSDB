@@ -16,14 +16,14 @@ struct DataTypeToStringValue {
     std::string operator()(const std::string& x) const {return x;}
     std::string operator()(int &x) const {return std::to_string(x);}
     std::string operator()(float &x) const {return std::to_string(x);}
-    std::string operator()(bool &x) const {return  (x == 1) ? "TRUE" : "FALSE";}
+    std::string operator()(bool &x) const {return  (x == 1) ? "true" : "false";}
 };
 
 struct DataTypeToStringValueSave {
     std::string operator()(const std::string& x) const {return "\"" + x + "\"";}
     std::string operator()(int &x) const {return std::to_string(x);}
     std::string operator()(float &x) const {return std::to_string(x);}
-    std::string operator()(bool &x) const {return  (x == 1) ? "TRUE" : "FALSE";}
+    std::string operator()(bool &x) const {return  (x == 1) ? "true" : "false";}
 };
 
 struct DataTypeToTypeString {

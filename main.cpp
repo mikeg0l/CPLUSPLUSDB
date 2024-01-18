@@ -67,7 +67,7 @@ int main() {
         }
 
         else if (command == "SELECT") {
-
+            handleSelect(db, iss);
         }
 
         else if (command == "UPDATE") {

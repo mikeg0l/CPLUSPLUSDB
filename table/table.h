@@ -13,6 +13,7 @@ struct Table {
     void insert(const std::map<std::string, std::string>& rowData);
     void addColumn(const std::string &columnName, const std::string &columnType);
     void convertAndAssignValue(const std::string& columnName, const std::string& value, TableRow& row);
+    std::vector<TableRow> matchWhereClause(std::istringstream& whereClause);
     void update(const std::map<std::string, std::string>& conditions, const std::string& columnName, const std::string& valueOverride);
     void deleteRow();
 

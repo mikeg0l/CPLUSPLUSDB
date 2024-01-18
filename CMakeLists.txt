@@ -17,5 +17,8 @@ add_executable(2324Z_19_s26525_FK main.cpp
         database/database.h
         handlers/handlers.cpp
         handlers/handlers.h
+        table/condition.cpp
+        table/condition.h
+        table/tablerow.cpp
 )
 target_link_libraries(2324Z_19_s26525_FK fmt)
