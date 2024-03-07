@@ -6,9 +6,7 @@
 #include "condition.h"
 #include "../utils/parser.h"
 
-Table::Table(const std::string& tableName, const std::vector<std::string>& columnNames,
-             const std::vector<std::string>& columnTypes)
-        : name(tableName) {
+Table::Table(const std::string& tableName, const std::vector<std::string>& columnNames, const std::vector<std::string>& columnTypes): name(tableName) {
     for (size_t i = 0; i < columnNames.size(); i++) {
         columns[columnNames[i]] = Mapper::mapColumnType(columnTypes[i]);
         columnOrder.push_back(columnNames[i]);
@@ -25,27 +23,6 @@ void Table::insert(const std::map<std::string, std::string>& rowData) {
     }
     rows.push_back(newRow);
     fmt::println("INFO: INSERTED ROW");
-}
-
-void Table::display() {
-    Printer::printHorizontalLine(columns.size());
-
-    for (auto& columnName : columnOrder) {
-        fmt::print("{: ^13}|", columnName);
-    }
-
-    fmt::print("\n");
-    Printer::printHorizontalLine(columns.size());
-
-    for (auto& row : rows) {
-        for (const auto& columnName : columnOrder) {
-            fmt::print("{: ^13}|", std::visit(DataTypeToStringValue(), row.columns[columnName]));
-        }
-        fmt::print("\n");
-        Printer::printHorizontalLine(columnOrder.size());
-    }
-
-    fmt::print("\n");
 }
 
 void Table::addColumn(const std::string& columnName, const std::string& columnType) {
@@ -72,31 +49,45 @@ void Table::addColumn(const std::string& columnName, const std::string& columnTy
     fmt::println("INFO: ADDED COLUMN {} TO TABLE {}", columnName, name);
 }
 
-void Table::update(const std::map<std::string, std::string>& conditions, const std::string& columnName, const std::string& valueOverride) {
-    for (auto& row : rows) {
-        if (columns.find(columnName) == columns.end()) {
-            fmt::println("ERROR: COLUMN {} DOESN'T EXIST", columnName);
-            return;
-        }
-
-        auto updateRow = true;
-
-        for (const auto& [conditionColumn, conditionValue] : conditions) {
-            if (row.columns.find(conditionColumn) == row.columns.end()) {
-                updateRow = false;
-                fmt::println("ERROR: COLUMN {} DOESN'T EXIST", conditionColumn);
-                break;
-            } else if (std::visit(DataTypeToStringValue(), row.columns[conditionColumn]) != conditionValue) {
-                updateRow = false;
-                break;
-            }
-        }
-
-        if (updateRow) {
-            convertAndAssignValue(columnName, valueOverride, row);
-            fmt::println("INFO: UPDATED COLUMN {} WITH VALUE {}", columnName, valueOverride);
+void Table::select(std::vector<TableRow> matchedRows, const std::vector<std::string>& columnNames) {
+    Printer::printHorizontalLine(columnNames.size());
+    for (auto& columnName : columnOrder) {
+        if (std::find(columnNames.begin(), columnNames.end(), columnName) != columnNames.end()) {
+            Printer::printColumnOrValue(columnName);
         }
     }
+
+    fmt::print("\n");
+    Printer::printHorizontalLine(columnNames.size());
+
+    for (auto& row : matchedRows) {
+        for (auto& columnName : columnNames) {
+            Printer::printColumnOrValue(std::visit(DataTypeToStringValue(), row.columns[columnName]));
+        }
+        fmt::print("\n");
+        Printer::printHorizontalLine(columnNames.size());
+    }
+}
+
+std::vector<TableRow> matchLimitClause(std::istringstream* limitClause) {
+
+}
+
+void Table::rename(const std::string& tableName) {
+    name = tableName;
+}
+
+void Table::update(std::vector<TableRow> matchedRows, const std::string& columnName, const std::string& valueOverride) {
+    auto ctr = 0;
+    for (auto & row : rows) {
+        for (auto matchedRow : matchedRows) {
+            if (matchedRow == row) {
+                convertAndAssignValue(columnName, valueOverride, row);
+                ctr++;
+            }
+        }
+    }
+    fmt::println("INFO: UPDATED {} ROWS", ctr);
 }
 
 void Table::convertAndAssignValue(const std::string& columnName, const std::string& value, TableRow& row) {
@@ -119,7 +110,7 @@ void Table::convertAndAssignValue(const std::string& columnName, const std::stri
 }
 
 void Table::save(const std::string& filePath) {
-    std::ofstream file("../" + filePath);
+    std::ofstream file("../" + filePath, std::ios::app);
     if (!file.is_open()) {
         fmt::println("ERROR: FAILED TO OPEN FILE");
         return;
@@ -153,33 +144,46 @@ std::vector<TableRow> Table::matchWhereClause(std::istringstream& whereClause) {
     parseWhereClause(whereClause, &conditions, &logicalOperators);
 
     for (auto& row : rows) {
-        bool rowValid = true;
         for (auto& [columnName, columnValue] : row.columns) {
             for (auto& condition : conditions) {
-                if (!(condition.getColumnName() == columnName && condition.eval(columnValue))) {
-                    rowValid = false;
+                if (condition.getColumnName() == columnName) {
+                    condition.eval(columnValue);
                 }
             }
         }
-        // bool eval condition1
-        // bool eval condition2
-        // bool eval condition3
-        // bool eval conditionN
-        // std::vector<Condition> conditiny
-        // std::vector<bool> conditiny
-        // std::vector<std::string> Operatorylogincze n - 1
-        // Condition1.result AND Condition2.result OR Condition3.result AND Condition4.result
-        //
 
+        bool rowValid = conditions[0].getResult();
+        for (int i = 0; i < logicalOperators.size(); i++) {
+            if (logicalOperators[i] == "AND") {
+                rowValid = rowValid && conditions[i+1].getResult();
+            } else {
+                rowValid = rowValid || conditions[i+1].getResult();
+            }
+        }
+
+        if (rowValid) {
+            matchedRows.push_back(row);
+        }
+
+        for (auto& condition : conditions) {
+            condition.clearResult();
+        }
     }
+
+    return matchedRows;
 }
 
-void Table::deleteRow() {
-
-}
-
-std::string Table::getPrimaryKey() {
-    return primaryKey;
+void Table::deleteRow(std::vector<TableRow>& matchedRows) {
+    auto ctr = 0;
+    for (int i = 0; i < rows.size(); i++) {
+        for (auto matchedRow : matchedRows) {
+            if (matchedRow == rows[i]) {
+                rows.erase(rows.begin()+i);
+                ctr++;
+            }
+        }
+    }
+    fmt::println("INFO: DELETED {} ROWS", ctr);
 }
 
 std::string Table::getName() {
@@ -188,4 +192,8 @@ std::string Table::getName() {
 
 std::vector<std::string> Table::getColumnOrder() {
     return columnOrder;
+}
+
+std::vector<TableRow> Table::getRows() {
+    return rows;
 }

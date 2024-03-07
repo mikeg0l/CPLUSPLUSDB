@@ -1,6 +1,8 @@
 #include "handlers.h"
+#include "../utils/mapper.h"
 #include <sstream>
 #include <iomanip>
+#include <fmt/core.h>
 
 void handleCreateTable(Database& db, std::istringstream& iss) {
     std::string tableName;
@@ -20,12 +22,38 @@ void handleDeleteTable(Database& db, std::istringstream& iss) {
     std::string tableName;
     iss >> tableName;
     db.deleteTable(tableName);
+    fmt::println("INFO: TABLE {} DELETED", tableName);
 }
 
 void handleSelect(Database& db, std::istringstream& iss) {
-    std::string whereClause, tableName;
+    auto columnsToSelect = std::vector<std::string>();
+    bool selectAllColumns = false;
+    std::string column, tableName, ddlOperation;
+    iss >> column;
+    while (column != "FROM") {
+        if (column == "*") {
+            iss >> column;
+            selectAllColumns = true;
+            break;
+        }
+        columnsToSelect.push_back(column);
+        iss >> column;
+    }
+
     iss >> tableName;
-    db.getTable(tableName)->matchWhereClause(iss);
+
+    if (selectAllColumns) {
+        columnsToSelect = db.getTable(tableName)->getColumnOrder();
+    }
+
+    iss >> ddlOperation;
+
+    if (ddlOperation == "WHERE") {
+        auto rows = db.getTable(tableName)->matchWhereClause(iss);
+        db.getTable(tableName)->select(rows, columnsToSelect);
+    } else {
+        db.getTable(tableName)->select(db.getTable(tableName)->getRows(), columnsToSelect);
+    }
 }
 
 void handleSave(Database& db, std::istringstream& iss) {
@@ -47,7 +75,14 @@ void handleAddColumn(Database& db, std::istringstream& iss) {
 }
 
 void handleDeleteRow(Database& db, std::istringstream& iss) {
+    std::string tableName, from, ddlOperation;
 
+    iss >> from >> tableName >> ddlOperation;
+
+    if (ddlOperation == "WHERE") {
+        auto rows = db.getTable(tableName)->matchWhereClause(iss);
+        db.getTable(tableName)->deleteRow(rows);
+    }
 }
 
 void handleInsert(Database& db, std::istringstream& iss) {
@@ -65,8 +100,25 @@ void handleInsert(Database& db, std::istringstream& iss) {
 }
 
 void handleUpdate(Database& db, std::istringstream& iss) {
+    std::string tableName, columnName, columnValue, ddlOperation;
+    iss >> tableName >> columnName >> std::quoted(columnValue) >> ddlOperation;
 
+    if (ddlOperation == "WHERE") {
+        auto rows = db.getTable(tableName)->matchWhereClause(iss);
+        db.getTable(tableName)->update(rows, columnName, columnValue);
+    } else {
+        db.getTable(tableName)->update(db.getTable(tableName)->getRows(), columnName, columnValue);
+    }
 }
+
+void handleRename(Database& db, std::istringstream& iss) {
+    std::string tableName, newTableName;
+    iss >> tableName >> newTableName;
+
+    db.getTable(tableName)->rename(newTableName);
+    fmt::println("INFO: RENAMED TABLE {} TO {}", tableName, newTableName);
+}
+
 
 void handleList(Database& db, std::istringstream& iss) {
     db.listTables();
@@ -75,5 +127,5 @@ void handleList(Database& db, std::istringstream& iss) {
 void handleDisplay(Database& db, std::istringstream& iss) {
     std::string tableName;
     iss >> tableName;
-    db.getTable(tableName)->display();
+    db.getTable(tableName)->select(db.getTable(tableName)->getRows(), db.getTable(tableName)->getColumnOrder());
 }

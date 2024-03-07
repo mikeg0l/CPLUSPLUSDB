@@ -1,9 +1,0 @@
-PEOPLE
-ID INT
-NAME STRING
-SURNAME STRING
-
-1 "Łukasz" "Kamiński"
-2 "Maciej" "Warchlak" 
-3 "Mateusz" "Babiarz"
-4 "Karol" "Wiśniewski"

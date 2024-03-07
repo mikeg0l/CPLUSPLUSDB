@@ -29,48 +29,50 @@ void Database::loadTable(const std::string& filePath) {
     }
 
     std::string tableName;
-    std::getline(file, tableName);
+    while (std::getline(file, tableName)) {
 
-    std::vector<std::string> columnNames;
-    std::vector<std::string> columnTypes;
+        std::vector<std::string> columnNames;
+        std::vector<std::string> columnTypes;
 
-    std::string line;
-    while (std::getline(file, line)) {
-        if (line.empty()) {
-            break;
+        std::string line;
+        while (std::getline(file, line)) {
+            if (line.empty()) {
+                break;
+            }
+
+            std::istringstream iss(line);
+            std::string columnName;
+            std::string columnType;
+            iss >> columnName >> columnType;
+
+            columnNames.push_back(columnName);
+            columnTypes.push_back(columnType);
         }
 
-        std::istringstream iss(line);
-        std::string columnName;
-        std::string columnType;
-        iss >> columnName >> columnType;
+        Table table(tableName, columnNames, columnTypes);
 
-        columnNames.push_back(columnName);
-        columnTypes.push_back(columnType);
+        while (std::getline(file, line)) {
+            if (line.empty()) {
+                break;
+            }
+
+            std::istringstream iss(line);
+            std::map<std::string, std::string> rowData;
+            for (const auto& columnName : columnNames) {
+                std::string value;
+                iss >> std::quoted(value);
+                rowData[columnName] = value;
+            }
+
+            table.insert(rowData);
+        }
+
+        tables.push_back(table);
+
+        fmt::println("INFO: TABLE LOADED FROM {}", filePath);
     }
-
-    Table table(tableName, columnNames, columnTypes);
-
-    while (std::getline(file, line)) {
-        if (line.empty()) {
-            continue;
-        }
-
-        std::istringstream iss(line);
-        std::map<std::string, std::string> rowData;
-        for (const auto& columnName : columnNames) {
-            std::string value;
-            iss >> std::quoted(value);
-            rowData[columnName] = value;
-        }
-
-        table.insert(rowData);
-    }
-
-    tables.push_back(table);
 
     file.close();
-    fmt::println("INFO: TABLE LOADED FROM {}", filePath);
 }
 
 void Database::listTables() {

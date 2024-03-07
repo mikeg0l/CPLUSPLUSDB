@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.26)
-project(2324Z_19_s26525_FK)
+project(2324Z_19_s26525_TW)
 set(CMAKE_CXX_STANDARD 20)
 include(FetchContent)
 FetchContent_Declare(
@@ -8,17 +8,14 @@ FetchContent_Declare(
         GIT_TAG 10.2.1
 )
 FetchContent_MakeAvailable(fmt)
-add_executable(2324Z_19_s26525_FK main.cpp
+add_executable(2324Z_19_s26525_TW main.cpp
         table/table.cpp
         utils/parser.cpp
         utils/printer.cpp
         utils/mapper.cpp
         database/database.cpp
-        database/database.h
         handlers/handlers.cpp
-        handlers/handlers.h
         table/condition.cpp
-        table/condition.h
         table/tablerow.cpp
 )
-target_link_libraries(2324Z_19_s26525_FK fmt)
+target_link_libraries(2324Z_19_s26525_TW fmt)

@@ -8,7 +8,6 @@
 
 int main() {
     Database db;
-    db.loadTable("dupa_dump");
 
     while (true) {
         std::string input, command;
@@ -43,6 +42,7 @@ int main() {
 
         /**
          * Save the specified table to given file path
+         * Multiple tables can be saved into single file
          *
          * Usage:
          * SAVE tableName filePath
@@ -55,7 +55,7 @@ int main() {
         }
 
         /**
-         * Load table from given file path into the database
+         * Load tables from given file path into the database
          *
          * Usage:
          * LOAD filePath
@@ -66,12 +66,52 @@ int main() {
             handleLoad(db, iss);
         }
 
+        /**
+         * Usage:
+         * SELECT selectColumnName, selectColumnName, ... FROM tableName WHERE columnName aOp columnValue lOp [...]
+         *
+         * Select desired columns from table based on provided conditions
+         *
+         * @param selectColumnName Name of the column that will be selected
+         * @param tableName Name of the table that the row(s) will selected from
+         * @param columnName Name of the column used in condition
+         * @param aOp Arithmetic operator used in condition (=, !=, >, <, >=, <=)
+         * @param columnValue Value of the column used in condition
+         * @param lOp Logical operator used in condition (AND or OR)
+         */
         else if (command == "SELECT") {
             handleSelect(db, iss);
         }
 
+        /**
+         * Usage:
+         * UPDATE tableName updateColumnName overrideValue WHERE columnName aOp columnValue lOp [...]
+         *
+         * Select desired columns from table based on provided conditions
+         *
+         * @param tableName Name of the table that the row(s) will selected from
+         * @param updateColumnName Name of the column used in condition
+         * @param overrideValue Value of the column that will be update used in condition
+         * @param columnName Name of the column used in condition
+         * @param aOp Arithmetic operator used in condition (=, !=, >, <, >=, <=)
+         * @param columnValue Value of the column used in condition
+         * @param lOp Logical operator used in condition (AND or OR)
+         */
         else if (command == "UPDATE") {
+            handleUpdate(db, iss);
+        }
 
+        /**
+         * Usage:
+         * RENAME tableName newTableName
+         *
+         * Rename the table
+         *
+         * @param tableName Name of the table that will be renamed
+         * @param newTableName New name of the table
+         */
+        else if (command == "RENAME") {
+            handleRename(db, iss);
         }
 
         else if (command == "DELETE") {
@@ -89,8 +129,21 @@ int main() {
             if (subCommand == "TABLE") {
                 handleDeleteTable(db, iss);
             }
+
+            /**
+             * Delete rows from given table
+             *
+             * Usage:
+             * DELETE ROW FROM tableName WHERE columnName aOp columnValue lOp [...]
+             *
+             * @param tableName Name of the table that the row(s) will be deleted from
+             * @param columnName Name of the column used in condition
+             * @param aOp Arithmetic operator used in condition (=, !=, >, <, >=, <=)
+             * @param columnValue Value of the column used in condition
+             * @param lOp Logical operator used in condition (AND or OR)
+             */
             if (subCommand == "ROW") {
-                // ADD DELETE ROW
+                handleDeleteRow(db, iss);
             }
         }
 
@@ -157,14 +210,8 @@ int main() {
         else if (command == "EXIT") {
             return 0;
         }
-
+        else {
+            fmt::println("ERROR: UNKNOWN COMMAND");
+        }
     }
 }
-
-/*
- * TODO:
- * - SELECTy
- * - obsługa JOINÓw
- * - obsługa wielu WHERE oraz operatorów logicznych
- * - WHERE NAME = Maciej AND SURNAME = Siemek OR AGE > 9
- */

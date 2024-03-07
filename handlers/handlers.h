@@ -14,3 +14,4 @@ void handleSelect(Database& db, std::istringstream& iss);
 void handleUpdate(Database& db, std::istringstream& iss);
 void handleList(Database& db, std::istringstream& iss);
 void handleDisplay(Database& db, std::istringstream& iss);
+void handleRename(Database& db, std::istringstream& iss);
